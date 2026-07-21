@@ -23,4 +23,3 @@
 - Configured `CLAUDE.md` with project instructions and context files
 - Added `context/` directory with project overview, coding standards, AI interaction guidelines, and current feature tracking
 - Removed default Next.js public assets (SVGs)
-- Pushed initial commit to `github.com:slimane-achbouq/silo.git`
