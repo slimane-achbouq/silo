@@ -6,7 +6,7 @@
 
 <!-- Not Started | In Progress | Completed -->
 
-## Goals 
+## Goals
 
 <!-- Goals and requirements -->
 
@@ -23,3 +23,9 @@
 - Configured `CLAUDE.md` with project instructions and context files
 - Added `context/` directory with project overview, coding standards, AI interaction guidelines, and current feature tracking
 - Removed default Next.js public assets (SVGs)
+
+### 2026-07-22 — Dashboard UI Phase 1
+- Initialized ShadCN UI and installed Button/Input components
+- Added `/dashboard` route with layout, full-height sidebar (logo header + placeholder), and top bar (search, New collection, New item)
+- Set dark mode as the default theme
+- Verified build, lint, and rendering in the browser against the reference screenshot
