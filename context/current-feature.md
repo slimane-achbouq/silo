@@ -6,19 +6,18 @@ Completed
 
 ## Goals
 
-Set up Prisma ORM with Neon PostgreSQL database (see `context/features/database-spec.md`).
+Create a seed script to populate the database with sample data for development and demos (see `context/features/seed-spec.md`).
 
-- Use Neon PostgreSQL (serverless)
-- Use Prisma 7 (breaking changes vs earlier versions - read upgrade guide before implementing)
-- Create initial schema based on data models in `context/project-overview.md` (schema will evolve)
-- Include NextAuth models (Account, Session, VerificationToken)
-- Add appropriate indexes and cascade deletes
-- Always use migrations (`prisma migrate dev`), never `db push`, except when explicitly specified
+- Add `prisma/seed.ts` and wire it up as the Prisma seed entry point
+- Seed a demo `User` (slach@dev.io, "Demo User", password hashed with bcryptjs at 12 rounds, `isPro: false`, `emailVerified` set to current date)
+- Seed the 7 system `ItemType` rows (snippet, prompt, command, note, file, image, link) with their Lucide icon names and colors, `isSystem: true`
+- Seed 5 collections with items as specified in `context/features/seed-spec.md`: React Patterns (3 snippets), AI Workflows (3 prompts), DevOps (1 snippet, 1 command, 2 links), Terminal Commands (4 commands), Design Resources (4 links)
+- Use real, valid URLs for link items
 
 ## Notes
 
-- Development branch DB will be set via `DATABASE_URL`; a separate production branch will exist
-- References: `context/project-overview.md` (data models), `context/coding-standards.md` (database standards), Prisma docs (prisma.io/docs), Prisma 7 upgrade guide
+- References: `context/features/seed-spec.md` (full data spec), `context/project-overview.md` (data models), `context/coding-standards.md` (database standards)
+- Seed script should be idempotent/safe to re-run against the dev database (e.g. upsert on unique fields) since it will be run repeatedly during development
 
 ## History
 
@@ -60,4 +59,12 @@ Set up Prisma ORM with Neon PostgreSQL database (see `context/features/database-
 - Ran `prisma migrate dev --name init` against Neon, then `prisma generate` (Prisma 7 no longer auto-generates the client after migrating)
 - Added `.env.example` with `DATABASE_URL`/`DIRECT_URL` placeholders; excepted it from the `.env*` gitignore rule; gitignored the generated client output (`src/generated/prisma`)
 - Verified the client connects and queries Neon end-to-end via a throwaway `tsx` script (removed after verification)
+- Verified build and lint pass
+
+### 2026-07-22 — Seed Data
+- Installed `bcryptjs` (+ `@types/bcryptjs`) for password hashing
+- Wired `migrations.seed` in `prisma.config.ts` to `tsx prisma/seed.ts` so `prisma db seed` / post-migration seeding works
+- Added `prisma/seed.ts`: upserts the demo `User` (slach@dev.io, bcrypt-hashed password at 12 rounds) and the 7 system `ItemType` rows (userId-less, `isSystem: true`), then resets and recreates the demo user's collections/items so the script is safe to re-run
+- Seeded 5 collections per `context/features/seed-spec.md`: React Patterns (3 snippets), AI Workflows (3 prompts), DevOps (1 snippet, 1 command, 2 links), Terminal Commands (4 commands), Design Resources (4 links) — 18 items total, using real URLs for link items
+- Verified idempotency (ran the script twice, counts stayed stable) and via `npx prisma db seed`
 - Verified build and lint pass
