@@ -14,6 +14,8 @@ import {
   mockItems,
   mockItemTypes,
   type MockCollection,
+  type MockItem,
+  type MockItemType,
 } from "@/lib/mock-data";
 
 const TYPE_ICONS: Record<string, LucideIcon> = {
@@ -54,6 +56,64 @@ export function getItemCountByType(typeId: string): number {
 
 export function getFavoriteCollections(): MockCollection[] {
   return mockCollections.filter((collection) => collection.isFavorite);
+}
+
+export function getItemType(typeId: string): MockItemType | undefined {
+  return mockItemTypes.find((type) => type.id === typeId);
+}
+
+export function getPinnedItems(): MockItem[] {
+  return mockItems
+    .filter((item) => item.isPinned)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}
+
+export function getRecentItems(limit = 10): MockItem[] {
+  return [...mockItems]
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    .slice(0, limit);
+}
+
+export interface DashboardStats {
+  totalItems: number;
+  totalCollections: number;
+  favoriteItems: number;
+  favoriteCollections: number;
+}
+
+export function getDashboardStats(): DashboardStats {
+  return {
+    totalItems: mockItems.length,
+    totalCollections: mockCollections.length,
+    favoriteItems: mockItems.filter((item) => item.isFavorite).length,
+    favoriteCollections: mockCollections.filter(
+      (collection) => collection.isFavorite
+    ).length,
+  };
+}
+
+const RELATIVE_TIME_UNITS: { unit: Intl.RelativeTimeFormatUnit; ms: number }[] = [
+  { unit: "year", ms: 1000 * 60 * 60 * 24 * 365 },
+  { unit: "month", ms: 1000 * 60 * 60 * 24 * 30 },
+  { unit: "day", ms: 1000 * 60 * 60 * 24 },
+  { unit: "hour", ms: 1000 * 60 * 60 },
+  { unit: "minute", ms: 1000 * 60 },
+];
+
+const relativeTimeFormatter = new Intl.RelativeTimeFormat("en", {
+  numeric: "always",
+});
+
+export function formatRelativeTime(dateString: string, now = Date.now()): string {
+  const diffMs = new Date(dateString).getTime() - now;
+
+  for (const { unit, ms } of RELATIVE_TIME_UNITS) {
+    if (Math.abs(diffMs) >= ms) {
+      return relativeTimeFormatter.format(Math.round(diffMs / ms), unit);
+    }
+  }
+
+  return relativeTimeFormatter.format(Math.round(diffMs / 1000), "second");
 }
 
 export function getRecentCollections(limit = 4): MockCollection[] {

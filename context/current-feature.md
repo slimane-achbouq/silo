@@ -35,3 +35,10 @@
 - Added desktop collapse/expand toggle for the sidebar
 - Fixed a flex layout bug causing the sidebar header to shrink out of alignment with the top bar
 - Verified build, lint, and rendering (desktop, collapsed, and mobile drawer) in the browser
+
+### 2026-07-22 — Dashboard UI Phase 3
+- Installed ShadCN Card and Badge components
+- Added stats cards (items, collections, favorite items, favorite collections) to `/dashboard`
+- Added recent collections, pinned items, and 10 recent items sections, sourced from mock data
+- Added `getPinnedItems`, `getRecentItems`, `getDashboardStats`, `getItemType`, and `formatRelativeTime` helpers to `src/lib/dashboard.ts`
+- Verified build, lint, and rendering in the browser
