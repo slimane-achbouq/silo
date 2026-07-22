@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock, Folder, Star, Layers } from "lucide-react";
+import { Clock, Folder, Star, Layers, ChevronRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -9,34 +9,41 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { resolveLucideIcon } from "@/lib/icons";
 import { mockUser } from "@/lib/mock-data";
-import {
-  getFavoriteCollections,
-  getItemCountByType,
-  getItemTypeColorClass,
-  getItemTypeIcon,
-  getItemTypeSlug,
-  getRecentCollections,
-  mockItemTypes,
-} from "@/lib/dashboard";
+import type { CollectionSummary } from "@/lib/db/collections";
+import type { ItemTypeSummary } from "@/lib/db/items";
 
 interface SidebarContentProps {
+  itemTypes: ItemTypeSummary[];
+  favoriteCollections: CollectionSummary[];
+  recentCollections: CollectionSummary[];
   collapsed?: boolean;
   onNavigate?: () => void;
+}
+
+function getItemTypeSlug(name: string): string {
+  return `${name.toLowerCase()}s`;
+}
+
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
 function SidebarLink({
   href,
   icon: Icon,
   iconClassName,
+  iconStyle,
   label,
   meta,
   collapsed,
   onNavigate,
 }: {
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   iconClassName?: string;
+  iconStyle?: React.CSSProperties;
   label: string;
   meta?: string;
   collapsed?: boolean;
@@ -51,7 +58,7 @@ function SidebarLink({
         collapsed && "justify-center px-0"
       )}
     >
-      <Icon className={cn("size-4 shrink-0", iconClassName)} />
+      <Icon className={cn("size-4 shrink-0", iconClassName)} style={iconStyle} />
       {!collapsed && (
         <>
           <span className="flex-1 truncate">{label}</span>
@@ -81,13 +88,28 @@ function SidebarSectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
+function CollectionDot({
+  className,
+  style,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <span
+      className={cn("rounded-full border border-border", className)}
+      style={style}
+    />
+  );
+}
+
 export function SidebarContent({
+  itemTypes,
+  favoriteCollections,
+  recentCollections,
   collapsed = false,
   onNavigate,
 }: SidebarContentProps) {
-  const favoriteCollections = getFavoriteCollections();
-  const recentCollections = getRecentCollections();
-
   return (
     <div className="flex h-full flex-col">
       <nav className="flex-1 overflow-y-auto p-2">
@@ -119,14 +141,14 @@ export function SidebarContent({
         {!collapsed && <SidebarSectionLabel>Types</SidebarSectionLabel>}
         {collapsed && <Separator className="my-2" />}
         <div className="flex flex-col gap-0.5">
-          {mockItemTypes.map((type) => (
+          {itemTypes.map((type) => (
             <SidebarLink
               key={type.id}
               href={`/items/${getItemTypeSlug(type.name)}`}
-              icon={getItemTypeIcon(type.icon)}
-              iconClassName={getItemTypeColorClass(type.color)}
-              label={`${type.name}s`}
-              meta={String(getItemCountByType(type.id))}
+              icon={resolveLucideIcon(type.icon)}
+              iconStyle={{ color: type.color ?? undefined }}
+              label={`${capitalize(type.name)}s`}
+              meta={String(type.count)}
               collapsed={collapsed}
               onNavigate={onNavigate}
             />
@@ -166,7 +188,10 @@ export function SidebarContent({
                 <SidebarLink
                   key={collection.id}
                   href={`/collections/${collection.id}`}
-                  icon={Folder}
+                  icon={CollectionDot}
+                  iconStyle={{
+                    backgroundColor: collection.itemTypes[0]?.color ?? "var(--muted-foreground)",
+                  }}
                   label={collection.name}
                   collapsed={collapsed}
                   onNavigate={onNavigate}
@@ -175,6 +200,16 @@ export function SidebarContent({
             </div>
           </>
         )}
+
+        <div className="mt-1">
+          <SidebarLink
+            href="/collections"
+            icon={ChevronRight}
+            label="View all collections"
+            collapsed={collapsed}
+            onNavigate={onNavigate}
+          />
+        </div>
       </nav>
 
       <div className="border-t border-border p-2">

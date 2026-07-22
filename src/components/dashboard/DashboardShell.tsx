@@ -8,8 +8,22 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { SidebarContent } from "@/components/dashboard/SidebarContent";
+import type { CollectionSummary } from "@/lib/db/collections";
+import type { ItemTypeSummary } from "@/lib/db/items";
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+interface DashboardShellProps {
+  children: React.ReactNode;
+  itemTypes: ItemTypeSummary[];
+  favoriteCollections: CollectionSummary[];
+  recentCollections: CollectionSummary[];
+}
+
+export function DashboardShell({
+  children,
+  itemTypes,
+  favoriteCollections,
+  recentCollections,
+}: DashboardShellProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -31,7 +45,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           {!collapsed && <span className="font-semibold">Silo</span>}
         </div>
         <div className="min-h-0 flex-1">
-          <SidebarContent collapsed={collapsed} />
+          <SidebarContent
+            itemTypes={itemTypes}
+            favoriteCollections={favoriteCollections}
+            recentCollections={recentCollections}
+            collapsed={collapsed}
+          />
         </div>
         <div className="shrink-0 border-t border-border p-2">
           <Button
@@ -59,7 +78,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <span className="font-semibold">Silo</span>
           </div>
           <div className="flex-1 overflow-hidden">
-            <SidebarContent onNavigate={() => setMobileOpen(false)} />
+            <SidebarContent
+              itemTypes={itemTypes}
+              favoriteCollections={favoriteCollections}
+              recentCollections={recentCollections}
+              onNavigate={() => setMobileOpen(false)}
+            />
           </div>
         </SheetContent>
       </Sheet>

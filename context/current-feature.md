@@ -83,3 +83,15 @@ Not Started
 - Confirmed no seeded items are pinned, so the "Pinned items" section correctly renders nothing per spec
 - Left `src/lib/dashboard.ts`'s mock-backed sidebar helpers (`getItemType`, `getItemTypeIcon`, `getItemTypeColorClass`, `getItemTypeSlug`, `getFavoriteCollections`, `getItemCountByType`) untouched — `SidebarContent` still uses mock data, out of scope for this feature
 - Verified build, lint, and rendering in the browser via a running dev server — confirmed real item titles, type badges, and relative timestamps
+
+### 2026-07-22 — Stats & Sidebar (Real Data)
+- Added `getItemTypes()` to `src/lib/db/items.ts`, fetching the 7 system `ItemType` rows plus a per-type item count for the demo user, sorted in a fixed display order (Snippet, Prompt, Command, Note, File, Image, Link) rather than alphabetically
+- Added `getFavoriteCollections()` to `src/lib/db/collections.ts`, sharing the existing `CollectionSummary` shape and `toCollectionSummary()` mapper (extracted from `getRecentCollections()`) with the recents query
+- Converted `SidebarContent` from a mock-data-driven component into a plain presentational component that receives `itemTypes`, `favoriteCollections`, and `recentCollections` as props — it can no longer fetch data itself since it's rendered inside the client-only `DashboardShell`
+- `DashboardShell` now accepts and forwards those three props to both the desktop and mobile-drawer `SidebarContent` instances; `src/app/dashboard/layout.tsx` became an async server component that fetches all three via `Promise.all` and passes them down, with `export const dynamic = "force-dynamic"`
+- Item type links use `resolveLucideIcon` and the type's real hex color (matching the pattern already used for collections) instead of the old hardcoded icon/color maps, and link to `/items/[typename]s`
+- Recent collections now render a colored circle (`CollectionDot`) keyed to the collection's most-used item type instead of a plain folder icon; favorite collections keep the folder + yellow star treatment
+- Added a "View all collections" link below the collections lists, going to `/collections`
+- Removed the now-unused mock-backed helpers from `src/lib/dashboard.ts` (kept only `formatRelativeTime`) and trimmed `src/lib/mock-data.ts` down to just `mockUser`/`MockUser` (still used for the sidebar footer pending auth)
+- Updated `prisma/seed.ts` to mark two collections (React Patterns, AI Workflows) and three items (`useDebounce Hook`, `Code Review Prompt`, `Kill Process on Port`) as favorites, since no seeded data previously exercised the favorites UI; re-ran `prisma db seed`
+- Verified build and lint pass

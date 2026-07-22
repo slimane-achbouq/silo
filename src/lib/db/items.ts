@@ -81,6 +81,45 @@ export async function getRecentItems(limit = 10): Promise<ItemSummary[]> {
   return items.map(toItemSummary);
 }
 
+export interface ItemTypeSummary {
+  id: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+  count: number;
+}
+
+const ITEM_TYPE_ORDER = ["snippet", "prompt", "command", "note", "file", "image", "link"];
+
+export async function getItemTypes(): Promise<ItemTypeSummary[]> {
+  const user = await prisma.user.findUnique({ where: { email: DEMO_USER_EMAIL } });
+
+  const types = (
+    await prisma.itemType.findMany({
+      where: { isSystem: true },
+    })
+  ).sort((a, b) => ITEM_TYPE_ORDER.indexOf(a.name) - ITEM_TYPE_ORDER.indexOf(b.name));
+
+  if (!user) {
+    return types.map((type) => ({ ...type, count: 0 }));
+  }
+
+  const counts = await prisma.item.groupBy({
+    by: ["typeId"],
+    where: { userId: user.id },
+    _count: true,
+  });
+  const countByTypeId = new Map(counts.map((c) => [c.typeId, c._count]));
+
+  return types.map((type) => ({
+    id: type.id,
+    name: type.name,
+    icon: type.icon,
+    color: type.color,
+    count: countByTypeId.get(type.id) ?? 0,
+  }));
+}
+
 export interface DashboardStats {
   totalItems: number;
   totalCollections: number;

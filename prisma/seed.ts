@@ -76,6 +76,7 @@ async function main() {
       name: "React Patterns",
       description: "Reusable React patterns and hooks",
       userId: user.id,
+      isFavorite: true,
       items: {
         create: [
           {
@@ -84,6 +85,7 @@ async function main() {
             language: "typescript",
             userId: user.id,
             typeId: snippetTypeId,
+            isFavorite: true,
             description: "Debounces a fast-changing value, e.g. search input.",
             content: `import { useEffect, useState } from "react";
 
@@ -165,6 +167,7 @@ export function TabPanel({ id, children }: { id: string; children: ReactNode }) 
       name: "AI Workflows",
       description: "AI prompts and workflow automations",
       userId: user.id,
+      isFavorite: true,
       items: {
         create: [
           {
@@ -172,6 +175,7 @@ export function TabPanel({ id, children }: { id: string; children: ReactNode }) 
             contentType: "text",
             userId: user.id,
             typeId: promptTypeId,
+            isFavorite: true,
             description: "Structured prompt for a thorough code review pass.",
             content: `Review the following code for:
 1. Correctness and edge cases
@@ -312,6 +316,7 @@ vercel deploy --prod`,
             contentType: "text",
             userId: user.id,
             typeId: commandTypeId,
+            isFavorite: true,
             description: "Frees up a port by killing whatever process is bound to it.",
             content: "lsof -ti:3000 | xargs kill -9",
           },
