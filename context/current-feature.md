@@ -6,18 +6,21 @@ Completed
 
 ## Goals
 
-Create a seed script to populate the database with sample data for development and demos (see `context/features/seed-spec.md`).
+Replace the dummy collection data displayed in the main area of the dashboard (right side) with real data from the database, per `context/features/dashboard-collections-spec.md`.
 
-- Add `prisma/seed.ts` and wire it up as the Prisma seed entry point
-- Seed a demo `User` (slach@dev.io, "Demo User", password hashed with bcryptjs at 12 rounds, `isPro: false`, `emailVerified` set to current date)
-- Seed the 7 system `ItemType` rows (snippet, prompt, command, note, file, image, link) with their Lucide icon names and colors, `isSystem: true`
-- Seed 5 collections with items as specified in `context/features/seed-spec.md`: React Patterns (3 snippets), AI Workflows (3 prompts), DevOps (1 snippet, 1 command, 2 links), Terminal Commands (4 commands), Design Resources (4 links)
-- Use real, valid URLs for link items
+- Create `src/lib/db/collections.ts` with data fetching functions
+- Fetch collections directly in the server component (no client-side fetching)
+- Replace usage of `src/lib/mock-data.ts` on the dashboard with real Prisma-backed data from Neon
+- Keep the current design: 6 cards of recent collections, same layout as today
+- Derive collection card border color from the most-used content type in that collection
+- Show small icons of all item types present in that collection
+- Update the collection stats display
+- Do NOT add the items list underneath the cards yet — that comes in a later feature
 
 ## Notes
 
-- References: `context/features/seed-spec.md` (full data spec), `context/project-overview.md` (data models), `context/coding-standards.md` (database standards)
-- Seed script should be idempotent/safe to re-run against the dev database (e.g. upsert on unique fields) since it will be run repeatedly during development
+- References: `context/features/dashboard-collections-spec.md` (full spec), `context/project-overview.md` (data models), `context/coding-standards.md` (database standards)
+- Reference screenshot: `context/screenshots/dashboard-ui-main.png` if needed, though layout/design already exists and should be preserved
 
 ## History
 
@@ -68,3 +71,12 @@ Create a seed script to populate the database with sample data for development a
 - Seeded 5 collections per `context/features/seed-spec.md`: React Patterns (3 snippets), AI Workflows (3 prompts), DevOps (1 snippet, 1 command, 2 links), Terminal Commands (4 commands), Design Resources (4 links) — 18 items total, using real URLs for link items
 - Verified idempotency (ran the script twice, counts stayed stable) and via `npx prisma db seed`
 - Verified build and lint pass
+
+### 2026-07-22 — Dashboard Collections (Real Data)
+- Added `src/lib/db/collections.ts` with `getRecentCollections()`, fetching the demo user's collections from Neon via Prisma (ordered by `updatedAt`, with per-item-type counts) to replace `src/lib/mock-data.ts` on the dashboard
+- Added `src/lib/icons.ts` (`resolveLucideIcon`) to dynamically resolve the Lucide icon names stored on `ItemType` rows (e.g. `Code`, `Sparkles`) to components, since seeded data uses real Lucide names + hex colors rather than `mock-data.ts`'s lowercase keys/named colors
+- Converted `RecentCollections` to an async server component: kept the existing 6-card layout, added a left border colored by the collection's most-used item type, small icons for each type present, and an item count
+- Added `export const dynamic = "force-dynamic"` to `src/app/dashboard/page.tsx` so collection data is fetched fresh per request instead of baked in at build time
+- Left `PinnedItems`, `RecentItems`, and `StatsCards` on mock data — out of scope per `context/features/dashboard-collections-spec.md` (items list under collections is a later feature)
+- Data fetching currently hardcodes the demo user (`slach@dev.io`), matching `prisma/seed.ts`, until auth is implemented
+- Verified build (`/dashboard` renders as dynamic `ƒ`, not static), lint, and rendering in the browser — confirmed real collection names, item counts, and per-collection border colors via a running dev server
