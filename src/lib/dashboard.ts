@@ -14,7 +14,6 @@ import {
   mockItems,
   mockItemTypes,
   type MockCollection,
-  type MockItem,
   type MockItemType,
 } from "@/lib/mock-data";
 
@@ -62,36 +61,6 @@ export function getItemType(typeId: string): MockItemType | undefined {
   return mockItemTypes.find((type) => type.id === typeId);
 }
 
-export function getPinnedItems(): MockItem[] {
-  return mockItems
-    .filter((item) => item.isPinned)
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-}
-
-export function getRecentItems(limit = 10): MockItem[] {
-  return [...mockItems]
-    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
-    .slice(0, limit);
-}
-
-export interface DashboardStats {
-  totalItems: number;
-  totalCollections: number;
-  favoriteItems: number;
-  favoriteCollections: number;
-}
-
-export function getDashboardStats(): DashboardStats {
-  return {
-    totalItems: mockItems.length,
-    totalCollections: mockCollections.length,
-    favoriteItems: mockItems.filter((item) => item.isFavorite).length,
-    favoriteCollections: mockCollections.filter(
-      (collection) => collection.isFavorite
-    ).length,
-  };
-}
-
 const RELATIVE_TIME_UNITS: { unit: Intl.RelativeTimeFormatUnit; ms: number }[] = [
   { unit: "year", ms: 1000 * 60 * 60 * 24 * 365 },
   { unit: "month", ms: 1000 * 60 * 60 * 24 * 30 },
@@ -104,8 +73,8 @@ const relativeTimeFormatter = new Intl.RelativeTimeFormat("en", {
   numeric: "always",
 });
 
-export function formatRelativeTime(dateString: string, now = Date.now()): string {
-  const diffMs = new Date(dateString).getTime() - now;
+export function formatRelativeTime(date: string | Date, now = Date.now()): string {
+  const diffMs = new Date(date).getTime() - now;
 
   for (const { unit, ms } of RELATIVE_TIME_UNITS) {
     if (Math.abs(diffMs) >= ms) {

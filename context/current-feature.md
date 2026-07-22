@@ -1,26 +1,20 @@
 # Current Feature
 
+<!-- Feature Name -->
+
 ## Status
 
-Completed
+<!-- Not Started|In Progress|Completed -->
+
+Not Started
 
 ## Goals
 
-Replace the dummy collection data displayed in the main area of the dashboard (right side) with real data from the database, per `context/features/dashboard-collections-spec.md`.
-
-- Create `src/lib/db/collections.ts` with data fetching functions
-- Fetch collections directly in the server component (no client-side fetching)
-- Replace usage of `src/lib/mock-data.ts` on the dashboard with real Prisma-backed data from Neon
-- Keep the current design: 6 cards of recent collections, same layout as today
-- Derive collection card border color from the most-used content type in that collection
-- Show small icons of all item types present in that collection
-- Update the collection stats display
-- Do NOT add the items list underneath the cards yet — that comes in a later feature
+<!-- Goals & requirements -->
 
 ## Notes
 
-- References: `context/features/dashboard-collections-spec.md` (full spec), `context/project-overview.md` (data models), `context/coding-standards.md` (database standards)
-- Reference screenshot: `context/screenshots/dashboard-ui-main.png` if needed, though layout/design already exists and should be preserved
+<!-- Any extra notes -->
 
 ## History
 
@@ -80,3 +74,12 @@ Replace the dummy collection data displayed in the main area of the dashboard (r
 - Left `PinnedItems`, `RecentItems`, and `StatsCards` on mock data — out of scope per `context/features/dashboard-collections-spec.md` (items list under collections is a later feature)
 - Data fetching currently hardcodes the demo user (`slach@dev.io`), matching `prisma/seed.ts`, until auth is implemented
 - Verified build (`/dashboard` renders as dynamic `ƒ`, not static), lint, and rendering in the browser — confirmed real collection names, item counts, and per-collection border colors via a running dev server
+
+### 2026-07-22 — Dashboard Items (Real Data)
+- Added `src/lib/db/items.ts` with `getPinnedItems()`, `getRecentItems()`, and `getDashboardStats()`, fetching the demo user's items (and, for stats, collections) from Neon via Prisma, including each item's type and tags
+- Converted `ItemCard`, `PinnedItems`, `RecentItems`, and `StatsCards` to async server components sourced from `src/lib/db/items.ts` instead of `src/lib/mock-data.ts`
+- `ItemCard` now resolves its icon/color via `resolveLucideIcon` from the item's `ItemType` (matching the pattern used for collections) and renders tags as badges when present
+- `getDashboardStats()` counts real items/collections (total + favorites) for `StatsCards`, replacing the mock-derived counts
+- Confirmed no seeded items are pinned, so the "Pinned items" section correctly renders nothing per spec
+- Left `src/lib/dashboard.ts`'s mock-backed sidebar helpers (`getItemType`, `getItemTypeIcon`, `getItemTypeColorClass`, `getItemTypeSlug`, `getFavoriteCollections`, `getItemCountByType`) untouched — `SidebarContent` still uses mock data, out of scope for this feature
+- Verified build, lint, and rendering in the browser via a running dev server — confirmed real item titles, type badges, and relative timestamps

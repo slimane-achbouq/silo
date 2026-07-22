@@ -1,8 +1,8 @@
 import { ItemCard } from "@/components/dashboard/ItemCard";
-import { getRecentItems } from "@/lib/dashboard";
+import { getRecentItems } from "@/lib/db/items";
 
-export function RecentItems() {
-  const items = getRecentItems(10);
+export async function RecentItems() {
+  const items = await getRecentItems(10);
 
   if (items.length === 0) return null;
 
