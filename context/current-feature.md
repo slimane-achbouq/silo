@@ -1,7 +1,5 @@
 # Current Feature
 
-<!-- Feature name and short description -->
-
 ## Status
 
 <!-- Not Started | In Progress | Completed -->
@@ -29,3 +27,11 @@
 - Added `/dashboard` route with layout, full-height sidebar (logo header + placeholder), and top bar (search, New collection, New item)
 - Set dark mode as the default theme
 - Verified build, lint, and rendering in the browser against the reference screenshot
+
+### 2026-07-22 — Dashboard UI Phase 2
+- Installed ShadCN Avatar, Sheet, Separator, Scroll Area, Tooltip, and Collapsible components
+- Added collapsible sidebar (`DashboardShell`, `SidebarContent`) with Library nav, item type links (`/items/TYPE`) with counts, favorite collections, most recent collections, and a user avatar footer
+- Added a mobile drawer (Sheet) triggered from the top bar, always used on mobile view
+- Added desktop collapse/expand toggle for the sidebar
+- Fixed a flex layout bug causing the sidebar header to shrink out of alignment with the top bar
+- Verified build, lint, and rendering (desktop, collapsed, and mobile drawer) in the browser
