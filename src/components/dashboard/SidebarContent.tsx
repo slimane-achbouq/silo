@@ -3,6 +3,7 @@ import { Clock, Folder, Star, Layers, ChevronRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -37,6 +38,7 @@ function SidebarLink({
   iconStyle,
   label,
   meta,
+  pro,
   collapsed,
   onNavigate,
 }: {
@@ -46,6 +48,7 @@ function SidebarLink({
   iconStyle?: React.CSSProperties;
   label: string;
   meta?: string;
+  pro?: boolean;
   collapsed?: boolean;
   onNavigate?: () => void;
 }) {
@@ -62,6 +65,14 @@ function SidebarLink({
       {!collapsed && (
         <>
           <span className="flex-1 truncate">{label}</span>
+          {pro && (
+            <Badge
+              variant="outline"
+              className="h-4 shrink-0 px-1.5 text-[10px] font-medium tracking-wide text-muted-foreground uppercase"
+            >
+              Pro
+            </Badge>
+          )}
           {meta && (
             <span className="text-xs text-muted-foreground">{meta}</span>
           )}
@@ -149,6 +160,7 @@ export function SidebarContent({
               iconStyle={{ color: type.color ?? undefined }}
               label={`${capitalize(type.name)}s`}
               meta={String(type.count)}
+              pro={type.name === "file" || type.name === "image"}
               collapsed={collapsed}
               onNavigate={onNavigate}
             />

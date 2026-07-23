@@ -1,20 +1,23 @@
-# Current Feature
-
-<!-- Feature Name -->
+# Current Feature: Add Pro Badge to Sidebar
 
 ## Status
 
-<!-- Not Started|In Progress|Completed -->
-
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Goals & requirements -->
+- Add a "PRO" badge to the Files item type in the sidebar
+- Add a "PRO" badge to the Images item type in the sidebar
+- Use the ShadCN UI Badge component
+- Badge text must be uppercase ("PRO")
+- Badge styling should be clean and subtle (not loud/attention-grabbing)
 
 ## Notes
 
-<!-- Any extra notes -->
+- Source spec: `context/features/add-pro-badge-sidebar.md`
+- Sidebar item type list is rendered by `SidebarContent` (`src/components/.../SidebarContent.tsx`), fed by `getItemTypes()` in `src/lib/db/items.ts`
+- Per `context/project-overview.md`, custom types are Pro-only; File and Image are existing system types being gated/flagged as Pro features here
+- No mention of gating behavior (e.g., disabling the link) — scope appears to be visual badge only unless clarified
 
 ## History
 
