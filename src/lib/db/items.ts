@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
+import { getDemoUser } from "@/lib/db/demo-user";
 
-// TODO: replace with the authenticated user's id once auth is wired up.
-const DEMO_USER_EMAIL = "slach@dev.io";
+const CONTENT_PREVIEW_LENGTH = 200;
 
 export interface ItemSummary {
   id: string;
@@ -42,7 +42,7 @@ function toItemSummary(item: ItemWithRelations): ItemSummary {
   return {
     id: item.id,
     title: item.title,
-    content: item.content,
+    content: item.content ? item.content.slice(0, CONTENT_PREVIEW_LENGTH) : item.content,
     url: item.url,
     language: item.language,
     isFavorite: item.isFavorite,
@@ -54,7 +54,7 @@ function toItemSummary(item: ItemWithRelations): ItemSummary {
 }
 
 export async function getPinnedItems(limit = 6): Promise<ItemSummary[]> {
-  const user = await prisma.user.findUnique({ where: { email: DEMO_USER_EMAIL } });
+  const user = await getDemoUser();
   if (!user) return [];
 
   const items = await prisma.item.findMany({
@@ -68,7 +68,7 @@ export async function getPinnedItems(limit = 6): Promise<ItemSummary[]> {
 }
 
 export async function getRecentItems(limit = 10): Promise<ItemSummary[]> {
-  const user = await prisma.user.findUnique({ where: { email: DEMO_USER_EMAIL } });
+  const user = await getDemoUser();
   if (!user) return [];
 
   const items = await prisma.item.findMany({
@@ -92,32 +92,30 @@ export interface ItemTypeSummary {
 const ITEM_TYPE_ORDER = ["snippet", "prompt", "command", "note", "file", "image", "link"];
 
 export async function getItemTypes(): Promise<ItemTypeSummary[]> {
-  const user = await prisma.user.findUnique({ where: { email: DEMO_USER_EMAIL } });
-
-  const types = (
-    await prisma.itemType.findMany({
-      where: { isSystem: true },
-    })
-  ).sort((a, b) => ITEM_TYPE_ORDER.indexOf(a.name) - ITEM_TYPE_ORDER.indexOf(b.name));
+  const user = await getDemoUser();
 
   if (!user) {
-    return types.map((type) => ({ ...type, count: 0 }));
+    const types = await prisma.itemType.findMany({ where: { isSystem: true } });
+    return types
+      .map((type) => ({ id: type.id, name: type.name, icon: type.icon, color: type.color, count: 0 }))
+      .sort((a, b) => ITEM_TYPE_ORDER.indexOf(a.name) - ITEM_TYPE_ORDER.indexOf(b.name));
   }
 
-  const counts = await prisma.item.groupBy({
-    by: ["typeId"],
-    where: { userId: user.id },
-    _count: true,
-  });
+  const [types, counts] = await Promise.all([
+    prisma.itemType.findMany({ where: { isSystem: true } }),
+    prisma.item.groupBy({ by: ["typeId"], where: { userId: user.id }, _count: true }),
+  ]);
   const countByTypeId = new Map(counts.map((c) => [c.typeId, c._count]));
 
-  return types.map((type) => ({
-    id: type.id,
-    name: type.name,
-    icon: type.icon,
-    color: type.color,
-    count: countByTypeId.get(type.id) ?? 0,
-  }));
+  return types
+    .map((type) => ({
+      id: type.id,
+      name: type.name,
+      icon: type.icon,
+      color: type.color,
+      count: countByTypeId.get(type.id) ?? 0,
+    }))
+    .sort((a, b) => ITEM_TYPE_ORDER.indexOf(a.name) - ITEM_TYPE_ORDER.indexOf(b.name));
 }
 
 export interface DashboardStats {
@@ -128,7 +126,7 @@ export interface DashboardStats {
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  const user = await prisma.user.findUnique({ where: { email: DEMO_USER_EMAIL } });
+  const user = await getDemoUser();
   if (!user) {
     return { totalItems: 0, totalCollections: 0, favoriteItems: 0, favoriteCollections: 0 };
   }

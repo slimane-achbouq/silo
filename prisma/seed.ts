@@ -17,7 +17,7 @@ const SYSTEM_ITEM_TYPES = [
 ] as const;
 
 async function main() {
-  const passwordHash = await bcrypt.hash("12345678", 12);
+  const passwordHash = await bcrypt.hash(process.env.DEMO_USER_PASSWORD ?? "12345678", 12);
 
   const user = await prisma.user.upsert({
     where: { email: "slach@dev.io" },

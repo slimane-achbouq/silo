@@ -1,7 +1,5 @@
 import { prisma } from "@/lib/prisma";
-
-// TODO: replace with the authenticated user's id once auth is wired up.
-const DEMO_USER_EMAIL = "slach@dev.io";
+import { getDemoUser } from "@/lib/db/demo-user";
 
 export interface CollectionItemType {
   name: string;
@@ -65,7 +63,7 @@ function toCollectionSummary(collection: CollectionWithItems): CollectionSummary
 }
 
 export async function getRecentCollections(limit = 6): Promise<CollectionSummary[]> {
-  const user = await prisma.user.findUnique({ where: { email: DEMO_USER_EMAIL } });
+  const user = await getDemoUser();
   if (!user) return [];
 
   const collections = await prisma.collection.findMany({
@@ -79,7 +77,7 @@ export async function getRecentCollections(limit = 6): Promise<CollectionSummary
 }
 
 export async function getFavoriteCollections(): Promise<CollectionSummary[]> {
-  const user = await prisma.user.findUnique({ where: { email: DEMO_USER_EMAIL } });
+  const user = await getDemoUser();
   if (!user) return [];
 
   const collections = await prisma.collection.findMany({
