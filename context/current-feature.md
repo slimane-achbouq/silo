@@ -1,23 +1,20 @@
-# Current Feature: Add Pro Badge to Sidebar
+# Current Feature
+
+<!-- Feature Name -->
 
 ## Status
 
-In Progress
+<!-- Not Started|In Progress|Completed -->
+
+Not Started
 
 ## Goals
 
-- Add a "PRO" badge to the Files item type in the sidebar
-- Add a "PRO" badge to the Images item type in the sidebar
-- Use the ShadCN UI Badge component
-- Badge text must be uppercase ("PRO")
-- Badge styling should be clean and subtle (not loud/attention-grabbing)
+<!-- Goals & requirements -->
 
 ## Notes
 
-- Source spec: `context/features/add-pro-badge-sidebar.md`
-- Sidebar item type list is rendered by `SidebarContent` (`src/components/.../SidebarContent.tsx`), fed by `getItemTypes()` in `src/lib/db/items.ts`
-- Per `context/project-overview.md`, custom types are Pro-only; File and Image are existing system types being gated/flagged as Pro features here
-- No mention of gating behavior (e.g., disabling the link) — scope appears to be visual badge only unless clarified
+<!-- Any extra notes -->
 
 ## History
 
@@ -98,3 +95,10 @@ In Progress
 - Removed the now-unused mock-backed helpers from `src/lib/dashboard.ts` (kept only `formatRelativeTime`) and trimmed `src/lib/mock-data.ts` down to just `mockUser`/`MockUser` (still used for the sidebar footer pending auth)
 - Updated `prisma/seed.ts` to mark two collections (React Patterns, AI Workflows) and three items (`useDebounce Hook`, `Code Review Prompt`, `Kill Process on Port`) as favorites, since no seeded data previously exercised the favorites UI; re-ran `prisma db seed`
 - Verified build and lint pass
+
+### 2026-07-23 — Add Pro Badge to Sidebar
+- Added a "PRO" badge (ShadCN `Badge`, `variant="outline"`, uppercase, small/subtle styling) next to the Files and Images item type links in the sidebar
+- Threaded a new optional `pro` prop through `SidebarContent`'s internal `SidebarLink` component, gated behind the same `!collapsed` branch as the existing item-count `meta`, so it's hidden in the collapsed sidebar state
+- Enabled via `pro={type.name === "file" || type.name === "image"}` against the lowercase system type names from `getItemTypes()`
+- Visual-only change — no gating/disabling of the Files or Images links, matching the spec's scope
+- Verified build, lint, and rendering in the browser via a running dev server (desktop expanded sidebar)
