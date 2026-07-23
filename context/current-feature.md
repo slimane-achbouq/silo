@@ -102,3 +102,12 @@ Not Started
 - Enabled via `pro={type.name === "file" || type.name === "image"}` against the lowercase system type names from `getItemTypes()`
 - Visual-only change — no gating/disabling of the Files or Images links, matching the spec's scope
 - Verified build, lint, and rendering in the browser via a running dev server (desktop expanded sidebar)
+
+### 2026-07-23 — Code Review Quick Wins
+- Ran the `code-scanner` subagent against the full codebase (0 critical, 3 high, 4 medium, 4 low findings) and pulled the lowest-risk items into this feature
+- Added `src/lib/db/demo-user.ts` (`DEMO_USER_EMAIL` + `getDemoUser()` wrapped in React's `cache()`) so a single request dedupes the repeated "look up demo user by email" Prisma call; switched all 6 call sites in `src/lib/db/collections.ts` and `src/lib/db/items.ts` to use it
+- `getItemTypes()` now runs `itemType.findMany` and `item.groupBy` concurrently via `Promise.all`, and its `!user` fallback branch builds `{ id, name, icon, color, count: 0 }` explicitly instead of spreading the raw Prisma row
+- `toItemSummary()` truncates `item.content` to 200 chars before it reaches `ItemCard`'s preview text
+- `prisma/seed.ts`'s demo password now reads `process.env.DEMO_USER_PASSWORD ?? "12345678"`, documented in `.env.example`
+- Deliberately excluded (higher risk / bigger scope, left for future features): `Suspense` boundaries on `/dashboard` sections, splitting `SidebarContent.tsx`, and replacing the sidebar footer's `mockUser` with the real demo user (pending auth)
+- Verified build, lint, and rendering in the browser via a running dev server — confirmed real seeded data (e.g. React Patterns collection) still renders correctly
