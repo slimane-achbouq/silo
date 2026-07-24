@@ -131,3 +131,14 @@ Not Started
 - Verified end-to-end via a running dev server: registration happy path, duplicate email, and password mismatch all return correct responses; credentials sign-in via `/api/auth/callback/credentials` sets a valid session and `/dashboard` returns 200 with it (302 without); GitHub OAuth still initiates correctly
 - Verified build and lint pass
 - Noted but left as follow-up (non-blocking): the register route's existence-check-then-create isn't atomic (a race could hit the DB's unique constraint and fall through to a generic 500 instead of 409); `authorize()` has a minor timing side-channel for email enumeration since it short-circuits before `bcrypt.compare` when no user is found
+
+### 2026-07-24 — Auth Phase 3 - Sign In, Register & Sign Out UI
+- Added custom `/sign-in` (`SignInForm`) and `/register` (`RegisterForm`) pages, replacing NextAuth's default pages; set `pages.signIn: "/sign-in"` in `src/auth.config.ts` and pointed `src/proxy.ts`'s unauthenticated redirect at `/sign-in` instead of `/api/auth/signin`
+- `SignInForm` uses `next-auth/react`'s `signIn("credentials", { redirect: false })` and `signIn("github")`, with inline error display; wrapped in `<Suspense>` in `page.tsx` since it reads `callbackUrl` via `useSearchParams`
+- `RegisterForm` posts to the existing `POST /api/auth/register`, validates password match client-side before submitting, and redirects to `/sign-in` on success
+- Added `src/lib/utils.ts`'s `getInitials()` and a reusable `UserAvatar` component (`src/components/shared/UserAvatar.tsx`) — GitHub `image` if present, else initials from `name`
+- Added `UserMenu` (`src/components/dashboard/UserMenu.tsx`): avatar links to `/profile`, name/email area is a dropdown trigger (ShadCN `dropdown-menu`, newly installed) with a "Sign out" item calling `signOut({ callbackUrl: "/sign-in" })`
+- `SidebarContent` now takes a `user` prop (name/email/image) instead of importing `mockUser`; threaded through `DashboardShell` from `src/app/dashboard/layout.tsx`, which now calls `auth()` alongside the existing data fetches
+- Deleted `src/lib/mock-data.ts` (no longer referenced anywhere)
+- Installed ShadCN `label` and `sonner` components; mounted `<Toaster />` in the root layout with `richColors` enabled so `RegisterForm`'s `toast.success("Account created — you can now log in")` renders green
+- Verified build, lint, and the full flow in the browser via a running dev server: custom sign-in page renders, credentials sign-in redirects to `/dashboard` with the real user in the sidebar footer, the sign-out dropdown works and redirects to `/sign-in`, GitHub OAuth still redirects to GitHub's real authorize screen, and registration creates an account, shows the green success toast, and redirects to `/sign-in` — test accounts created during verification were deleted from the Neon `development` branch afterward
