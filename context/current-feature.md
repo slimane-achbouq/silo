@@ -1,44 +1,20 @@
-# Current Feature: Auth Phase 2 - Credentials Provider (Email/Password)
+# Current Feature
+
+<!-- Feature Name -->
 
 ## Status
 
-In Progress
+<!-- Not Started|In Progress|Completed -->
+
+Not Started
 
 ## Goals
 
-- Add Credentials provider for email/password authentication with registration
-- Use bcryptjs for hashing (already installed)
-- Add password field to User model via migration if not already there
-- Update `auth.config.ts` with Credentials provider placeholder (`authorize: () => null`)
-- Update `auth.ts` to override Credentials with bcrypt validation
-- Create registration API route at `POST /api/auth/register`:
-  - Accept: name, email, password, confirmPassword
-  - Validate passwords match
-  - Check if user already exists
-  - Hash password with bcryptjs
-  - Create user in database
-  - Return success/error response
+<!-- Goals & requirements -->
 
 ## Notes
 
-### Credentials Provider in Split Pattern
-- `auth.config.ts`: Add Credentials provider with `authorize: () => null` placeholder (edge-compatible)
-- `auth.ts`: Override the Credentials provider with actual bcrypt validation logic
-
-### Testing
-1. Test registration via curl:
-```bash
-curl -X POST http://localhost:3000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Test","email":"test@test.com","password":"password123","confirmPassword":"password123"}'
-```
-2. Go to `/api/auth/signin`
-3. Sign in with email/password
-4. Verify redirect to `/dashboard`
-5. Verify GitHub OAuth still works
-
-### References
-- Credentials provider: https://authjs.dev/getting-started/authentication/credentials
+<!-- Any extra notes -->
 
 ## History
 
@@ -146,3 +122,12 @@ curl -X POST http://localhost:3000/api/auth/register \
 - Used NextAuth's default sign-in page (no custom `pages.signIn`), per spec
 - Verified build and lint pass; verified in the browser via the running dev server that `/dashboard` redirects to the default sign-in page and that clicking "Sign in with GitHub" redirects to GitHub's real OAuth authorize screen with the correct `client_id`/callback URL
 - Did not complete a full GitHub login round-trip (requires the user's own GitHub credentials) — OAuth wiring verified up to GitHub's authorize page
+
+### 2026-07-24 — Auth Phase 2 - Credentials Provider (Email/Password)
+- Added a Credentials provider to `src/auth.config.ts` with `authorize: () => null` (edge-compatible placeholder, used by `src/proxy.ts`)
+- `src/auth.ts` overrides the Credentials provider with real bcrypt validation: looks up the user by email, compares the password hash, returns the user or `null`
+- Confirmed `password` already existed on `User` in `prisma/schema.prisma` — no migration needed
+- Added `POST /api/auth/register` (`src/app/api/auth/register/route.ts`): validates name/email/password/confirmPassword with Zod (min lengths, email format, password match via `.refine`), checks for an existing user (409), hashes with bcryptjs at 12 rounds (matching `prisma/seed.ts`), creates the user, returns `{ success, data|error }`
+- Verified end-to-end via a running dev server: registration happy path, duplicate email, and password mismatch all return correct responses; credentials sign-in via `/api/auth/callback/credentials` sets a valid session and `/dashboard` returns 200 with it (302 without); GitHub OAuth still initiates correctly
+- Verified build and lint pass
+- Noted but left as follow-up (non-blocking): the register route's existence-check-then-create isn't atomic (a race could hit the DB's unique constraint and fall through to a generic 500 instead of 409); `authorize()` has a minor timing side-channel for email enumeration since it short-circuits before `bcrypt.compare` when no user is found
