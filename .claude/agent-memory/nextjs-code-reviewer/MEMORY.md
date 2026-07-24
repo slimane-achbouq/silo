@@ -1,0 +1,1 @@
+- [Demo user lookup duplication](pattern_demo_user_lookup.md) — every src/lib/db/* helper re-fetches the demo user by email; will need cleanup once auth lands

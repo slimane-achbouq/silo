@@ -11,11 +11,18 @@ import { SidebarContent } from "@/components/dashboard/SidebarContent";
 import type { CollectionSummary } from "@/lib/db/collections";
 import type { ItemTypeSummary } from "@/lib/db/items";
 
+interface DashboardUser {
+  name: string;
+  email: string;
+  image?: string | null;
+}
+
 interface DashboardShellProps {
   children: React.ReactNode;
   itemTypes: ItemTypeSummary[];
   favoriteCollections: CollectionSummary[];
   recentCollections: CollectionSummary[];
+  user: DashboardUser;
 }
 
 export function DashboardShell({
@@ -23,6 +30,7 @@ export function DashboardShell({
   itemTypes,
   favoriteCollections,
   recentCollections,
+  user,
 }: DashboardShellProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -49,6 +57,7 @@ export function DashboardShell({
             itemTypes={itemTypes}
             favoriteCollections={favoriteCollections}
             recentCollections={recentCollections}
+            user={user}
             collapsed={collapsed}
           />
         </div>
@@ -82,6 +91,7 @@ export function DashboardShell({
               itemTypes={itemTypes}
               favoriteCollections={favoriteCollections}
               recentCollections={recentCollections}
+              user={user}
               onNavigate={() => setMobileOpen(false)}
             />
           </div>

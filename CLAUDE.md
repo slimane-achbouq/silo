@@ -41,3 +41,14 @@ next.config.ts    # Next.js configuration
 ```
 
 The project is in early setup — only the root route exists.
+
+## Neon MCP
+
+When using the Neon MCP server for this project, always target:
+
+- **Project**: `silo` (project ID `rapid-salad-85204270`)
+- **Branch**: `development` (branch ID `br-late-mud-aujxdci0`)
+
+Pass this project ID and branch ID explicitly on every Neon MCP call (e.g. `run_sql`, `describe_branch`) unless I explicitly say otherwise for that request.
+
+**Never read from or write to the `production` branch (`br-cold-firefly-aueyvc37`) unless I explicitly name "production" in the request.** This includes read-only queries — default to `development` even for simple SELECTs.

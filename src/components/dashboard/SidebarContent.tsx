@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Clock, Folder, Star, Layers, ChevronRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -11,14 +10,21 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { resolveLucideIcon } from "@/lib/icons";
-import { mockUser } from "@/lib/mock-data";
+import { UserMenu } from "@/components/dashboard/UserMenu";
 import type { CollectionSummary } from "@/lib/db/collections";
 import type { ItemTypeSummary } from "@/lib/db/items";
+
+interface SidebarUser {
+  name: string;
+  email: string;
+  image?: string | null;
+}
 
 interface SidebarContentProps {
   itemTypes: ItemTypeSummary[];
   favoriteCollections: CollectionSummary[];
   recentCollections: CollectionSummary[];
+  user: SidebarUser;
   collapsed?: boolean;
   onNavigate?: () => void;
 }
@@ -118,6 +124,7 @@ export function SidebarContent({
   itemTypes,
   favoriteCollections,
   recentCollections,
+  user,
   collapsed = false,
   onNavigate,
 }: SidebarContentProps) {
@@ -225,24 +232,12 @@ export function SidebarContent({
       </nav>
 
       <div className="border-t border-border p-2">
-        <div
-          className={cn(
-            "flex items-center gap-2.5 rounded-md px-2 py-2",
-            collapsed && "justify-center px-0"
-          )}
-        >
-          <Avatar size="sm">
-            <AvatarFallback>{mockUser.initials}</AvatarFallback>
-          </Avatar>
-          {!collapsed && (
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">{mockUser.name}</p>
-              <p className="truncate text-xs text-muted-foreground">
-                {mockUser.email}
-              </p>
-            </div>
-          )}
-        </div>
+        <UserMenu
+          name={user.name}
+          email={user.email}
+          image={user.image}
+          collapsed={collapsed}
+        />
       </div>
     </div>
   );
